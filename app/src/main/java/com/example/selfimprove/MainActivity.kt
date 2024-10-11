@@ -1,17 +1,22 @@
 package com.example.selfimprove
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
+    //request codes
+    private val STRENGTH_REQUEST_CODE = 0
 
     //exp variables
     var strengthXp = 0
@@ -25,12 +30,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var levelNum: TextView
 
     //level variables
+    var overallLevel = 0
     var strengthLevel = 0
     var smartLevel = 0
     var dexLevel = 0
     var wisLevel = 0
     var chsLevel = 0
     var conLevel = 0
+
 
     //stats level numbers
     lateinit var strengthNum: TextView
@@ -40,9 +47,21 @@ class MainActivity : AppCompatActivity() {
     lateinit var chsNum: TextView
     lateinit var conNum: TextView
 
+    //progress bars
+    lateinit var strengthProgress: ProgressBar
+    lateinit var smartProgress: ProgressBar
+    lateinit var dexProgress: ProgressBar
+    lateinit var wisProgress: ProgressBar
+    lateinit var chsProgress: ProgressBar
+    lateinit var conProgress: ProgressBar
+
+    //launchers
+    private lateinit var questLauncher: ActivityResultLauncher<Intent>
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -50,6 +69,35 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        questLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                data?.let {
+
+                    //getting xp from each quest type
+                    val strengthXpEarned = it.getIntExtra("strengthXpEarned", 0)
+                    val dexXpEarned = it.getIntExtra("dexXpEarned", 0)
+                    val wisXpEarned = it.getIntExtra("wisXpEarned", 0)
+
+                    //updating xp values
+                    dexXp += dexXpEarned
+                    wisXp += wisXpEarned
+                    strengthXp += strengthXpEarned
+
+                    //invoking the methods
+                    if (strengthXpEarned > 0) {
+                        increaseStrength(strengthProgress)
+                    }
+                    if (dexXpEarned > 0) {
+                        increaseDex(dexProgress)
+                    }
+                    if (wisXpEarned > 0) {
+                        increaseWis(wisProgress)
+                    }
+                }
+            }
         }
 
         //overall level text render
@@ -64,13 +112,16 @@ class MainActivity : AppCompatActivity() {
         chsNum = findViewById(R.id.chsNum)
         conNum = findViewById(R.id.conNum)
 
+        //setting max progress
+
+
         //Rendered Progress bars
-        val strengthProgress = findViewById<ProgressBar>(R.id.strengthProgress)
-        val smartProgress = findViewById<ProgressBar>(R.id.intProgress)
-        val dexProgress = findViewById<ProgressBar>(R.id.dexProgress)
-        val wisProgress = findViewById<ProgressBar>(R.id.wisProgress)
-        val chsProgress = findViewById<ProgressBar>(R.id.chsProgress)
-        val conProgress = findViewById<ProgressBar>(R.id.conProgress)
+        strengthProgress = findViewById<ProgressBar>(R.id.strengthProgress)
+        smartProgress = findViewById<ProgressBar>(R.id.intProgress)
+        dexProgress = findViewById(R.id.dexProgress)
+        wisProgress = findViewById<ProgressBar>(R.id.wisProgress)
+        chsProgress = findViewById<ProgressBar>(R.id.chsProgress)
+        conProgress = findViewById<ProgressBar>(R.id.conProgress)
 
         //Main Buttons
         val questButton = findViewById<Button>(R.id.questButton)
@@ -79,6 +130,13 @@ class MainActivity : AppCompatActivity() {
         val placeholderButton1 = findViewById<Button>(R.id.placehold1)
         val placeholderButton2 = findViewById<Button>(R.id.placehold2)
 
+        //logic to send the user to the quests screen
+        questButton.setOnClickListener {
+            val intent = Intent(this, questScreen::class.java)
+            questLauncher.launch(intent)
+        }
+
+        //testing button for levelling up
         placeholderButton1.setOnClickListener {
             increaseStrength(strengthProgress)
             increaseSmart(smartProgress)
@@ -89,9 +147,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
+
     //ALL INCREASE STAT FUNCTIONS ARE PLACEHOLDER FOR NOW (until the quests screen is done)
     fun increaseStrength(strengthBar: ProgressBar){
-            strengthXp += 50
         if (strengthXp <= strengthBar.max) {
             strengthBar.progress += strengthXp
         } else {
@@ -104,7 +164,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun increaseSmart(smartBar : ProgressBar){
-        smartXp += 25
         if (smartXp <= smartBar.max) {
             smartBar.progress += smartXp
         } else {
@@ -117,7 +176,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun increaseDex(dexBar : ProgressBar){
-        dexXp += 33
         if (dexXp <= dexBar.max) {
             dexBar.progress += dexXp
         } else {
@@ -130,7 +188,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun increaseWis(wisBar : ProgressBar){
-        wisXp += 33
         if (wisXp <= wisBar.max) {
             wisBar.progress += wisXp
         } else {
@@ -143,7 +200,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun increaseChs(chsBar: ProgressBar){
-        chsXp += 33
         if (chsXp <= chsBar.max){
             chsBar.progress += chsXp
         } else {
@@ -156,7 +212,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun increaseCon(conBar: ProgressBar){
-        conXp += 35
         if (conXp <= conBar.max){
             conBar.progress += conXp
         } else {
@@ -171,7 +226,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun updateOverallLevel(){
-        var overallLevel =+ strengthLevel + smartLevel + dexLevel + wisLevel + chsLevel + conLevel
+        overallLevel =+ strengthLevel + smartLevel + dexLevel + wisLevel + chsLevel + conLevel
         var displayLevel = overallLevel / 2
         levelNum.text = displayLevel.toString()
     }
