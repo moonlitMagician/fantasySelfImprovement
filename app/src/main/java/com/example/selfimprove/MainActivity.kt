@@ -15,8 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
-    //request codes
-    private val STRENGTH_REQUEST_CODE = 0
+
 
     //exp variables
     var strengthXp = 0
@@ -59,6 +58,58 @@ class MainActivity : AppCompatActivity() {
     private lateinit var questLauncher: ActivityResultLauncher<Intent>
 
     @SuppressLint("MissingInflatedId")
+
+    fun saveStatData() {
+        val sharedPreferences = getSharedPreferences("StatData", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        editor.putInt("strengthXp", strengthXp)
+        editor.putInt("strengthLevel", strengthLevel)
+
+        editor.putInt("smartXp", smartXp)
+        editor.putInt("smartLevel", smartLevel)
+
+        editor.putInt("dexXp", dexXp)
+        editor.putInt("dexLevel", dexLevel)
+
+        editor.putInt("wisXp", wisXp)
+        editor.putInt("wisLevel", wisLevel)
+
+        editor.putInt("chsXp", chsXp)
+        editor.putInt("chsLevel", chsLevel)
+
+        editor.putInt("conXp", conXp)
+        editor.putInt("conLevel", conLevel)
+
+        editor.putInt("overallLevel", overallLevel)
+
+        editor.apply() // Saves changes asynchronously
+    }
+
+    fun loadStatData() {
+        val sharedPreferences = getSharedPreferences("StatData", MODE_PRIVATE)
+
+        strengthXp = sharedPreferences.getInt("strengthXp", 0)
+        strengthLevel = sharedPreferences.getInt("strengthLevel", 0)
+
+        smartXp = sharedPreferences.getInt("smartXp", 0)
+        smartLevel = sharedPreferences.getInt("smartLevel", 0)
+
+        dexXp = sharedPreferences.getInt("dexXp", 0)
+        dexLevel = sharedPreferences.getInt("dexLevel", 0)
+
+        wisXp = sharedPreferences.getInt("wisXp", 0)
+        wisLevel = sharedPreferences.getInt("wisLevel", 0)
+
+        chsXp = sharedPreferences.getInt("chsXp", 0)
+        chsLevel = sharedPreferences.getInt("chsLevel", 0)
+
+        conXp = sharedPreferences.getInt("conXp", 0)
+        conLevel = sharedPreferences.getInt("conLevel", 0)
+
+        overallLevel = sharedPreferences.getInt("overallLevel", 0)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
 
@@ -71,6 +122,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        loadStatData()
+
         questLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
@@ -80,11 +133,17 @@ class MainActivity : AppCompatActivity() {
                     val strengthXpEarned = it.getIntExtra("strengthXpEarned", 0)
                     val dexXpEarned = it.getIntExtra("dexXpEarned", 0)
                     val wisXpEarned = it.getIntExtra("wisXpEarned", 0)
+                    val conXpEarned = it.getIntExtra("conXpEarned", 0)
+                    val smartXpEarned = it.getIntExtra("smartXpEarned", 0)
+                    val chsXpEarned = it.getIntExtra("chsXpEarned", 0)
 
                     //updating xp values
                     dexXp += dexXpEarned
                     wisXp += wisXpEarned
                     strengthXp += strengthXpEarned
+                    conXp += conXpEarned
+                    smartXp += smartXpEarned
+                    chsXp += chsXpEarned
 
                     //invoking the methods
                     if (strengthXpEarned > 0) {
@@ -95,6 +154,15 @@ class MainActivity : AppCompatActivity() {
                     }
                     if (wisXpEarned > 0) {
                         increaseWis(wisProgress)
+                    }
+                    if (conXpEarned > 0) {
+                        increaseStrength(conProgress)
+                    }
+                    if (smartXpEarned > 0) {
+                        increaseDex(smartProgress)
+                    }
+                    if (chsXpEarned > 0) {
+                        increaseWis(chsProgress)
                     }
                 }
             }
@@ -112,7 +180,14 @@ class MainActivity : AppCompatActivity() {
         chsNum = findViewById(R.id.chsNum)
         conNum = findViewById(R.id.conNum)
 
-        //setting max progress
+        //render the saved stats
+        strengthNum.text = strengthLevel.toString()
+        smartNum.text = smartLevel.toString()
+        dexNum.text = dexLevel.toString()
+        wisNum.text = wisLevel.toString()
+        chsNum.text = wisLevel.toString()
+        conNum.text = conLevel.toString()
+        levelNum.text = (overallLevel / 2).toString()
 
 
         //Rendered Progress bars
@@ -122,6 +197,14 @@ class MainActivity : AppCompatActivity() {
         wisProgress = findViewById<ProgressBar>(R.id.wisProgress)
         chsProgress = findViewById<ProgressBar>(R.id.chsProgress)
         conProgress = findViewById<ProgressBar>(R.id.conProgress)
+
+        smartProgress.progress = smartXp
+        strengthProgress.progress = strengthXp
+        dexProgress.progress = dexXp
+        wisProgress.progress = wisXp
+        chsProgress.progress = chsXp
+        conProgress.progress = conXp
+
 
         //Main Buttons
         val questButton = findViewById<Button>(R.id.questButton)
@@ -161,6 +244,7 @@ class MainActivity : AppCompatActivity() {
             strengthNum.text = strengthLevel.toString()
             updateOverallLevel()
         }
+        saveStatData()
     }
 
     fun increaseSmart(smartBar : ProgressBar){
@@ -173,6 +257,7 @@ class MainActivity : AppCompatActivity() {
             smartNum.text = smartLevel.toString()
             updateOverallLevel()
         }
+        saveStatData()
     }
 
     fun increaseDex(dexBar : ProgressBar){
@@ -185,6 +270,7 @@ class MainActivity : AppCompatActivity() {
             dexNum.text = dexLevel.toString()
             updateOverallLevel()
         }
+        saveStatData()
     }
 
     fun increaseWis(wisBar : ProgressBar){
@@ -197,6 +283,7 @@ class MainActivity : AppCompatActivity() {
             wisNum.text = wisLevel.toString()
             updateOverallLevel()
         }
+        saveStatData()
     }
 
     fun increaseChs(chsBar: ProgressBar){
@@ -209,6 +296,7 @@ class MainActivity : AppCompatActivity() {
             chsNum.text = chsLevel.toString()
             updateOverallLevel()
         }
+        saveStatData()
     }
 
     fun increaseCon(conBar: ProgressBar){
@@ -221,6 +309,7 @@ class MainActivity : AppCompatActivity() {
             conNum.text = conLevel.toString()
             updateOverallLevel()
         }
+        saveStatData()
     }
 
 
@@ -229,5 +318,6 @@ class MainActivity : AppCompatActivity() {
         overallLevel =+ strengthLevel + smartLevel + dexLevel + wisLevel + chsLevel + conLevel
         var displayLevel = overallLevel / 2
         levelNum.text = displayLevel.toString()
+        saveStatData()
     }
 }
