@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -37,6 +39,11 @@ class MainActivity : AppCompatActivity() {
     var chsLevel = 0
     var conLevel = 0
 
+    //initializing title text
+    lateinit var titleText: TextView
+
+    //storing current title
+    var curTitle: String = ""
 
     //stats level numbers
     lateinit var strengthNum: TextView
@@ -58,6 +65,31 @@ class MainActivity : AppCompatActivity() {
     private lateinit var questLauncher: ActivityResultLauncher<Intent>
 
     @SuppressLint("MissingInflatedId")
+
+    fun createUserTitle(): String {
+        return when {
+            strengthLevel >= 5 && dexLevel >= 5 -> "Whirlwind Vanguard"
+            strengthLevel >= 5 && smartLevel >= 5 -> "Battle Savant"
+            strengthLevel >= 5 && wisLevel >= 5 -> "Battle Monk"
+            strengthLevel >= 5 && chsLevel >= 5 -> "Heroic Paragon"
+            strengthLevel >= 5 && conLevel >= 5 -> "Living Fortress"
+            smartLevel >= 5 && dexLevel >= 5 -> "Proficient Mind-strider"
+            smartLevel >= 5 && wisLevel >= 5 -> "Lord of Philosophy"
+            smartLevel >= 5 && chsLevel >= 5 -> "Sovereign Orator"
+            smartLevel >= 5 && conLevel >= 5 -> "Stalwart Genius"
+            dexLevel >= 5 && wisLevel >= 5 -> "Fleet-foot Sage"
+            dexLevel >= 5 && conLevel >= 5 -> "Unbreakable Blade"
+            wisLevel >= 5 && chsLevel >= 5 -> "Luminary Oracle"
+            chsLevel >= 5 && conLevel >= 5 -> "Impervious Soverign"
+            strengthLevel >= 5 -> "Champion of Strength"
+            smartLevel >= 5 -> "Master of Intelligence"
+            dexLevel >= 5 -> "Nimble Hero"
+            wisLevel >= 5 -> "Sage of Wisdom"
+            chsLevel >= 5 -> "Charismatic Leader"
+            conLevel >= 5 -> "Enduring Warrior"
+            else -> "Commoner"
+        }
+    }
 
     fun saveStatData() {
         val sharedPreferences = getSharedPreferences("StatData", MODE_PRIVATE)
@@ -82,6 +114,8 @@ class MainActivity : AppCompatActivity() {
         editor.putInt("conLevel", conLevel)
 
         editor.putInt("overallLevel", overallLevel)
+
+        editor.putString("userTitle", curTitle)
 
         editor.apply() // Saves changes asynchronously
     }
@@ -108,8 +142,11 @@ class MainActivity : AppCompatActivity() {
         conLevel = sharedPreferences.getInt("conLevel", 0)
 
         overallLevel = sharedPreferences.getInt("overallLevel", 0)
+
+        curTitle = sharedPreferences.getString("userTitle", "Commoner") ?: "Commoner"
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
 
 
@@ -124,49 +161,55 @@ class MainActivity : AppCompatActivity() {
 
         loadStatData()
 
-        questLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                data?.let {
+        //rendered title text
+        titleText = findViewById<TextView>(R.id.titleHeader)
 
-                    //getting xp from each quest type
-                    val strengthXpEarned = it.getIntExtra("strengthXpEarned", 0)
-                    val dexXpEarned = it.getIntExtra("dexXpEarned", 0)
-                    val wisXpEarned = it.getIntExtra("wisXpEarned", 0)
-                    val conXpEarned = it.getIntExtra("conXpEarned", 0)
-                    val smartXpEarned = it.getIntExtra("smartXpEarned", 0)
-                    val chsXpEarned = it.getIntExtra("chsXpEarned", 0)
+        titleText.text = "Title: $curTitle"
 
-                    //updating xp values
-                    dexXp += dexXpEarned
-                    wisXp += wisXpEarned
-                    strengthXp += strengthXpEarned
-                    conXp += conXpEarned
-                    smartXp += smartXpEarned
-                    chsXp += chsXpEarned
+        questLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val data = result.data
+                    data?.let {
 
-                    //invoking the methods
-                    if (strengthXpEarned > 0) {
-                        increaseStrength(strengthProgress)
-                    }
-                    if (dexXpEarned > 0) {
-                        increaseDex(dexProgress)
-                    }
-                    if (wisXpEarned > 0) {
-                        increaseWis(wisProgress)
-                    }
-                    if (conXpEarned > 0) {
-                        increaseStrength(conProgress)
-                    }
-                    if (smartXpEarned > 0) {
-                        increaseDex(smartProgress)
-                    }
-                    if (chsXpEarned > 0) {
-                        increaseWis(chsProgress)
+                        //getting xp from each quest type
+                        val strengthXpEarned = it.getIntExtra("strengthXpEarned", 0)
+                        val dexXpEarned = it.getIntExtra("dexXpEarned", 0)
+                        val wisXpEarned = it.getIntExtra("wisXpEarned", 0)
+                        val conXpEarned = it.getIntExtra("conXpEarned", 0)
+                        val smartXpEarned = it.getIntExtra("smartXpEarned", 0)
+                        val chsXpEarned = it.getIntExtra("chsXpEarned", 0)
+
+                        //updating xp values
+                        dexXp += dexXpEarned
+                        wisXp += wisXpEarned
+                        strengthXp += strengthXpEarned
+                        conXp += conXpEarned
+                        smartXp += smartXpEarned
+                        chsXp += chsXpEarned
+
+                        //invoking the methods
+                        if (strengthXpEarned > 0) {
+                            increaseStrength(strengthProgress)
+                        }
+                        if (dexXpEarned > 0) {
+                            increaseDex(dexProgress)
+                        }
+                        if (wisXpEarned > 0) {
+                            increaseWis(wisProgress)
+                        }
+                        if (conXpEarned > 0) {
+                            increaseCon(conProgress)
+                        }
+                        if (smartXpEarned > 0) {
+                            increaseSmart(smartProgress)
+                        }
+                        if (chsXpEarned > 0) {
+                            increaseWis(chsProgress)
+                        }
                     }
                 }
             }
-        }
 
         //overall level text render
         val levelText = findViewById<TextView>(R.id.levelText)
@@ -187,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         wisNum.text = wisLevel.toString()
         chsNum.text = wisLevel.toString()
         conNum.text = conLevel.toString()
-        levelNum.text = (overallLevel / 2).toString()
+        levelNum.text = overallLevel.toString()
 
 
         //Rendered Progress bars
@@ -198,6 +241,8 @@ class MainActivity : AppCompatActivity() {
         chsProgress = findViewById<ProgressBar>(R.id.chsProgress)
         conProgress = findViewById<ProgressBar>(R.id.conProgress)
 
+
+        //render the saved progress
         smartProgress.progress = smartXp
         strengthProgress.progress = strengthXp
         dexProgress.progress = dexXp
@@ -210,7 +255,7 @@ class MainActivity : AppCompatActivity() {
         val questButton = findViewById<Button>(R.id.questButton)
 
         //placeholder buttons
-        val placeholderButton1 = findViewById<Button>(R.id.placehold1)
+        val awakenButton = findViewById<Button>(R.id.placehold1)
         val placeholderButton2 = findViewById<Button>(R.id.placehold2)
 
         //logic to send the user to the quests screen
@@ -220,21 +265,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         //testing button for levelling up
-        placeholderButton1.setOnClickListener {
-            increaseStrength(strengthProgress)
-            increaseSmart(smartProgress)
-            increaseDex(dexProgress)
-            increaseWis(wisProgress)
-            increaseChs(chsProgress)
-            increaseCon(conProgress)
+        awakenButton.setOnClickListener {
+            if (overallLevel >= 10) {
+                curTitle = createUserTitle()
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("New Title")
+                builder.setMessage("Congratulations! You have earned the title: $curTitle!")
+                builder.setPositiveButton("OK", null)
+                builder.show()
+                titleText.text = "Title: ${curTitle}"
+            } else {
+                Toast.makeText(this, "You need to be level 10 to earn a title", Toast.LENGTH_LONG)
+                    .show()
+            }
+            saveStatData()
         }
     }
 
 
-
-
     //ALL INCREASE STAT FUNCTIONS ARE PLACEHOLDER FOR NOW (until the quests screen is done)
-    fun increaseStrength(strengthBar: ProgressBar){
+    fun increaseStrength(strengthBar: ProgressBar) {
         if (strengthXp <= strengthBar.max) {
             strengthBar.progress += strengthXp
         } else {
@@ -247,7 +297,7 @@ class MainActivity : AppCompatActivity() {
         saveStatData()
     }
 
-    fun increaseSmart(smartBar : ProgressBar){
+    fun increaseSmart(smartBar: ProgressBar) {
         if (smartXp <= smartBar.max) {
             smartBar.progress += smartXp
         } else {
@@ -260,7 +310,7 @@ class MainActivity : AppCompatActivity() {
         saveStatData()
     }
 
-    fun increaseDex(dexBar : ProgressBar){
+    fun increaseDex(dexBar: ProgressBar) {
         if (dexXp <= dexBar.max) {
             dexBar.progress += dexXp
         } else {
@@ -273,7 +323,7 @@ class MainActivity : AppCompatActivity() {
         saveStatData()
     }
 
-    fun increaseWis(wisBar : ProgressBar){
+    fun increaseWis(wisBar: ProgressBar) {
         if (wisXp <= wisBar.max) {
             wisBar.progress += wisXp
         } else {
@@ -286,8 +336,8 @@ class MainActivity : AppCompatActivity() {
         saveStatData()
     }
 
-    fun increaseChs(chsBar: ProgressBar){
-        if (chsXp <= chsBar.max){
+    fun increaseChs(chsBar: ProgressBar) {
+        if (chsXp <= chsBar.max) {
             chsBar.progress += chsXp
         } else {
             chsLevel++
@@ -299,8 +349,8 @@ class MainActivity : AppCompatActivity() {
         saveStatData()
     }
 
-    fun increaseCon(conBar: ProgressBar){
-        if (conXp <= conBar.max){
+    fun increaseCon(conBar: ProgressBar) {
+        if (conXp <= conBar.max) {
             conBar.progress += conXp
         } else {
             conLevel++
@@ -313,11 +363,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    private fun updateOverallLevel(){
-        overallLevel =+ strengthLevel + smartLevel + dexLevel + wisLevel + chsLevel + conLevel
-        var displayLevel = overallLevel / 2
-        levelNum.text = displayLevel.toString()
+    private fun updateOverallLevel() {
+        overallLevel = +strengthLevel + smartLevel + dexLevel + wisLevel + chsLevel + conLevel
+        levelNum.text = overallLevel.toString()
         saveStatData()
     }
 }

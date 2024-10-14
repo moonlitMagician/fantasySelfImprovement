@@ -31,7 +31,20 @@ class questScreen : AppCompatActivity() {
         "Practice a sport, or physical activity",
         "Learn a new skill or hobby",
         "Practice a hobby you already have",
-        "Complete or make progress on a puzzle (such as a Jigsaw puzzle or rubik's cube)"
+        "Complete or make progress on a puzzle (such as a Jigsaw puzzle or rubik's cube)",
+        "Write a journal entry and reflect on how you're currently feeling",
+        "Meditate for at least 10 minutes",
+        "Initiate a conversation with a stranger",
+        "Genuinely compliment 3 Strangers",
+        "Avoid Processed/Junk food for all 3 of your meals",
+        "Take a 5km walk or run",
+        "Take a short, cold shower",
+        "Catch up with an old friend or family member",
+        "Listen to a genre of music you've never listened to before",
+        "Speak on the phone with a friend or family member for at least 15 minutes",
+        "Watch a documentary on a topic you find interesting",
+        "Listen to a podcast on a topic you find interesting",
+        "Complete a challenging puzzle (Such as a crossword, or sudoku)",
     )
 
     //The reward the quest is going to give, used only in backend and logic
@@ -42,6 +55,19 @@ class questScreen : AppCompatActivity() {
         "dexXpEarned",
         "dexXpEarned",
         "dexXpEarned",
+        "wisXpEarned",
+        "wisXpEarned",
+        "chsXpEarned",
+        "chsXpEarned",
+        "conXpEarned",
+        "strengthXpEarned",
+        "conXpEarned",
+        "chsXpEarned",
+        "wisXpEarned",
+        "chsXpEarned",
+        "smartXpEarned",
+        "smartXpEarned",
+        "smartXpEarned",
     )
 
     //Displaying the reward of a quest to the user
@@ -52,6 +78,19 @@ class questScreen : AppCompatActivity() {
         "Dexterity",
         "Dexterity",
         "Dexterity",
+        "Wisdom",
+        "Wisdom",
+        "Charisma",
+        "Charisma",
+        "Constitution",
+        "Strength",
+        "Constitution",
+        "Charisma",
+        "Wisdom",
+        "Charisma",
+        "Intelligence",
+        "Intelligence",
+        "Intelligence"
     )
 
     @SuppressLint("MissingInflatedId")
@@ -61,7 +100,7 @@ class questScreen : AppCompatActivity() {
 
 
     fun createRandomQuest(): List<Int> {
-        val questId = arrayOf(0, 1, 2, 3, 4, 5)
+        val questId = arrayOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9 , 10, 11, 12, 13, 14, 15, 16, 17, 18)
         val selectedIndices = mutableSetOf<Int>()
 
         while (selectedIndices.size < 3) {
