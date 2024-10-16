@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -344,6 +344,8 @@ class MainActivity : AppCompatActivity() {
         //logic to send the user to the quests screen
         questButton.setOnClickListener {
             val intent = Intent(this, questScreen::class.java)
+            intent.putExtra("sorcererTheme", sorcererTheme)
+            intent.putExtra("adventureTheme", adventureTheme)
             questLauncher.launch(intent)
         }
 

@@ -65,7 +65,7 @@ class questScreen : AppCompatActivity() {
     )
 
     //Displaying the reward of a quest to the user
-    val rewardTitle = arrayOf(
+    val adventureRewardTitle = arrayOf(
         "Strength",
         "Constitution",
         "Strength",
@@ -86,6 +86,44 @@ class questScreen : AppCompatActivity() {
         "Intelligence",
         "Intelligence"
     )
+
+    //Different themes and their stats:
+    //Fantasy - JJk - DBZ:
+    //Strength - Cursed Energy
+    //Intelligence - Technique Mastery
+    //dexterity - speed
+    //Charisma - influence
+    //Constitution - Resilience
+    //Wisdom - Combat Skill
+
+    val sorcererRewardTitle = arrayOf(
+        "Cursed Energy",
+        "Resilience",
+        "Cursed Energy",
+        "Speed",
+        "Speed",
+        "Speed",
+        "Combat Skill",
+        "Combat Skill",
+        "Influence",
+        "Influence",
+        "Resilience",
+        "Cursed Energy",
+        "Resilience",
+        "Influence",
+        "Combat Skill",
+        "Influence",
+        "Technique Mastery",
+        "Technique Mastery",
+        "Technique Mastery"
+    )
+
+    var questCompleted1 = false
+    var questCompleted2 = false
+    var questCompleted3 = false
+
+    private var sorcererTheme = false
+    private var adventureTheme = false
 
     private lateinit var complete1: Button
     private lateinit var complete2: Button
@@ -117,33 +155,6 @@ class questScreen : AppCompatActivity() {
         return selectedIndices.toList()
     }
 
-    private fun resetVisibilityToDefault(sharedPrefs: SharedPreferences) {
-        // Quest buttons visible, completion texts invisible
-        complete1.isVisible = true
-        completeText1.isVisible = false
-
-        complete2.isVisible = true
-        completeText2.isVisible = false
-
-        complete3.isVisible = true
-        completeText3.isVisible = false
-
-        // Save default visibility state in sharedPrefs
-        with(sharedPrefs.edit()) {
-            putBoolean("complete1Visible", complete1.isVisible)
-            putBoolean("completeText1Visible", completeText1.isVisible)
-
-            putBoolean("complete2Visible", complete2.isVisible)
-            putBoolean("completeText2Visible", completeText2.isVisible)
-
-            putBoolean("complete3Visible", complete3.isVisible)
-            putBoolean("completeText3Visible", completeText3.isVisible)
-
-            apply()
-        }
-    }
-
-
 
     @SuppressLint("SetTextI18n", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -157,6 +168,9 @@ class questScreen : AppCompatActivity() {
         }
 
         timerTextView = findViewById(R.id.timerText)
+
+        sorcererTheme = intent.getBooleanExtra("sorcererTheme", false)
+        adventureTheme = intent.getBooleanExtra("adventureTheme", false)
 
         //storing daily quests:
         val sharedPrefs: SharedPreferences =
@@ -173,14 +187,14 @@ class questScreen : AppCompatActivity() {
         } else {
             // Quests have expired, generate new ones
             generateNewQuests(sharedPrefs)
-            resetVisibilityToDefault(sharedPrefs)
+
         }
 
         var quest1Id: Int
         var quest2Id: Int
         var quest3Id: Int
 
-        if (currentTime - lastGeneratedTime >= oneDayMillis) {
+        if (currentTime - lastGeneratedTime >= 24 * 60 * 60 * 1000L) {
 
             // More than 24 hours have passed, generate new quests
             val newQuestIds = createRandomQuest()
@@ -193,6 +207,8 @@ class questScreen : AppCompatActivity() {
                 putInt("quest1Id", quest1Id)
                 putInt("quest2Id", quest2Id)
                 putInt("quest3Id", quest3Id)
+                putBoolean("questCompleted1", false)
+                putBoolean("questCompleted2", false)
                 putLong("lastGeneratedTime", currentTime)
                 apply()
             }
@@ -228,24 +244,50 @@ class questScreen : AppCompatActivity() {
         completeText2 = findViewById<TextView>(R.id.completeText2)
         completeText3 = findViewById<TextView>(R.id.completeText3)
 
-        complete1.isVisible = sharedPrefs.getBoolean("complete1Visible", true)
-        completeText1.isVisible = sharedPrefs.getBoolean("completeText1Visible", false)
+        // Retrieve saved quest completion states
+        questCompleted1 = sharedPrefs.getBoolean("questCompleted1", false)
+        questCompleted2 = sharedPrefs.getBoolean("questCompleted2", false)
+        questCompleted3 = sharedPrefs.getBoolean("questCompleted3", false)
 
-        complete2.isVisible = sharedPrefs.getBoolean("complete2Visible", true)
-        completeText2.isVisible = sharedPrefs.getBoolean("completeText2Visible", false)
+        // Set button visibility based on saved completion state
+        if (questCompleted1) {
+            complete1.isVisible = false
+            completeText1.isVisible = true
+        }
 
-        complete3.isVisible = sharedPrefs.getBoolean("complete3Visible", true)
-        completeText3.isVisible = sharedPrefs.getBoolean("completeText3Visible", false)
+        if (questCompleted2) {
+            complete2.isVisible = false
+            completeText2.isVisible = true
+        }
+
+        if (questCompleted3) {
+            complete3.isVisible = false
+            completeText3.isVisible = true
+        }
+
 
 
         //changing quests values
-        reward1.text = "Reward: 50 ${rewardTitle[quest1Id]} XP"
+        if (sorcererTheme) {
+            reward1.text = "Reward: 50 ${sorcererRewardTitle[quest1Id]} XP" }
+        else if (adventureTheme) {
+            reward1.text = "Reward: 50 ${adventureRewardTitle[quest1Id]} XP" }
+
         quest1.text = questDetails[quest1Id]
 
-        reward2.text = "Reward: 75 ${rewardTitle[quest2Id]} XP"
+        if (sorcererTheme) {
+        reward2.text = "Reward: 75 ${sorcererRewardTitle[quest2Id]} XP" }
+        else if (adventureTheme){
+            reward2.text = "Reward: 75 ${adventureRewardTitle[quest2Id]} XP"
+        }
+
         quest2.text = questDetails[quest2Id]
 
-        reward3.text = "Reward: 100 ${rewardTitle[quest3Id]} XP"
+        if (sorcererTheme) {
+            reward3.text = "Reward: 100 ${sorcererRewardTitle[quest3Id]} XP" }
+        else if (adventureTheme){
+            reward3.text = "Reward: 100 ${adventureRewardTitle[quest3Id]} XP"
+        }
         quest3.text = questDetails[quest3Id]
 
         //logic to send the user back to the stat screen
@@ -259,11 +301,12 @@ class questScreen : AppCompatActivity() {
             complete1.isVisible = false
             completeText1.isVisible = true
 
-            // Save visibility state
+            questCompleted1 = true
+
+            val sharedPrefs: SharedPreferences = getSharedPreferences("questPrefs", Context.MODE_PRIVATE)
             with(sharedPrefs.edit()) {
-                putBoolean("complete1Visible", complete1.isVisible)
-                putBoolean("completeText1Visible", completeText1.isVisible)
-                apply()
+                putBoolean("questCompleted1", questCompleted1)
+                apply() // Save the data
             }
 
             val resultIntent = Intent()
@@ -277,12 +320,14 @@ class questScreen : AppCompatActivity() {
             complete2.isVisible = false
             completeText2.isVisible = true
 
-            // Save visibility state
+            questCompleted2 = true
+
+            val sharedPrefs: SharedPreferences = getSharedPreferences("questPrefs", Context.MODE_PRIVATE)
             with(sharedPrefs.edit()) {
-                putBoolean("complete2Visible", complete2.isVisible)
-                putBoolean("completeText2Visible", completeText2.isVisible)
-                apply()
+                putBoolean("questCompleted2", questCompleted2)
+                apply() // Save the data
             }
+
             val resultIntent = Intent()
             resultIntent.putExtra(questReward[quest2Id], 75)
             setResult(RESULT_OK, resultIntent)
@@ -294,16 +339,43 @@ class questScreen : AppCompatActivity() {
             complete3.isVisible = false
             completeText3.isVisible = true
 
-            // Save visibility state
+            questCompleted3 = true
+
+            val sharedPrefs: SharedPreferences = getSharedPreferences("questPrefs", Context.MODE_PRIVATE)
             with(sharedPrefs.edit()) {
-                putBoolean("complete3Visible", complete3.isVisible)
-                putBoolean("completeText3Visible", completeText3.isVisible)
-                apply()
+                putBoolean("questCompleted3", questCompleted3)
+                apply() // Save the data
             }
+
+
             val resultIntent = Intent()
             resultIntent.putExtra(questReward[quest3Id], 100)
             setResult(RESULT_OK, resultIntent)
             finish()
+        }
+
+        val resetButton = findViewById<Button>(R.id.resetButton)
+        resetButton.setOnClickListener {
+            // Reset quest completion booleans
+            with(sharedPrefs.edit()) {
+                putBoolean("questCompleted1", false)
+                putBoolean("questCompleted2", false)
+                putBoolean("questCompleted3", false)
+                apply()
+            }
+
+            // Reset UI
+            complete1.isVisible = true
+            completeText1.isVisible = false
+            complete2.isVisible = true
+            completeText2.isVisible = false
+            complete3.isVisible = true
+            completeText3.isVisible = false
+
+            // Reset local variables
+            questCompleted1 = false
+            questCompleted2 = false
+            questCompleted3 = false
         }
     }
 

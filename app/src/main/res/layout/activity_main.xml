@@ -318,17 +318,16 @@
 
     <TextView
         android:id="@+id/titleHeader"
-        android:layout_width="379dp"
-        android:layout_height="107dp"
-        android:layout_marginTop="52dp"
+        android:layout_width="375dp"
+        android:layout_height="95dp"
         android:text="Title: Commoner"
         android:textAlignment="center"
         android:textSize="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.906"
+        app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.867" />
+        app:layout_constraintTop_toBottomOf="@+id/levelText"
+        app:layout_constraintVertical_bias="0.845" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
