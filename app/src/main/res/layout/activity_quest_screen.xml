@@ -52,7 +52,7 @@
         android:id="@+id/quest1"
         android:layout_width="259dp"
         android:layout_height="37dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="76dp"
         android:text="testQuest1"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -102,13 +102,13 @@
         android:id="@+id/quest2"
         android:layout_width="273dp"
         android:layout_height="41dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="68dp"
         android:text="testQuest2"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/quest2Text"
-        app:layout_constraintVertical_bias="0.008" />
+        app:layout_constraintVertical_bias="0.016" />
 
     <Button
         android:id="@+id/complete2"
@@ -141,7 +141,7 @@
         android:id="@+id/quest3"
         android:layout_width="264dp"
         android:layout_height="46dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="72dp"
         android:text="testQuest3"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -196,4 +196,43 @@
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/reward3" />
+
+    <TextView
+        android:id="@+id/completeText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quest Completed!"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.306" />
+
+    <TextView
+        android:id="@+id/completeText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quest Completed!"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.543" />
+
+    <TextView
+        android:id="@+id/completeText3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quest Completed!"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.764" />
 </androidx.constraintlayout.widget.ConstraintLayout>

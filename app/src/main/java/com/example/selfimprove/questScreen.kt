@@ -12,17 +12,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class questScreen : AppCompatActivity() {
-    //arrays for quest randomization
-
-    //The ID is used to make sure that the reward and the quest are lined up using parallel arrays
-    //This is to make sure a quest doesn't give the incorrect reward
-
-
-    //The details used to give the actual quest requirements
 
 
     val questDetails = arrayOf(
@@ -93,10 +87,18 @@ class questScreen : AppCompatActivity() {
         "Intelligence"
     )
 
+    private lateinit var complete1: Button
+    private lateinit var complete2: Button
+    private lateinit var complete3: Button
+
+    private lateinit var completeText1: TextView
+    private lateinit var completeText2: TextView
+    private lateinit var completeText3: TextView
     @SuppressLint("MissingInflatedId")
 
     private lateinit var timerTextView: TextView
     private val oneDayMillis = 24 * 60 * 60 * 1000L
+    private val halfMinMillis = 30 * 1000L
 
 
     fun createRandomQuest(): List<Int> {
@@ -115,9 +117,35 @@ class questScreen : AppCompatActivity() {
         return selectedIndices.toList()
     }
 
+    private fun resetVisibilityToDefault(sharedPrefs: SharedPreferences) {
+        // Quest buttons visible, completion texts invisible
+        complete1.isVisible = true
+        completeText1.isVisible = false
+
+        complete2.isVisible = true
+        completeText2.isVisible = false
+
+        complete3.isVisible = true
+        completeText3.isVisible = false
+
+        // Save default visibility state in sharedPrefs
+        with(sharedPrefs.edit()) {
+            putBoolean("complete1Visible", complete1.isVisible)
+            putBoolean("completeText1Visible", completeText1.isVisible)
+
+            putBoolean("complete2Visible", complete2.isVisible)
+            putBoolean("completeText2Visible", completeText2.isVisible)
+
+            putBoolean("complete3Visible", complete3.isVisible)
+            putBoolean("completeText3Visible", completeText3.isVisible)
+
+            apply()
+        }
+    }
 
 
-    @SuppressLint("SetTextI18n")
+
+    @SuppressLint("SetTextI18n", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -145,13 +173,15 @@ class questScreen : AppCompatActivity() {
         } else {
             // Quests have expired, generate new ones
             generateNewQuests(sharedPrefs)
+            resetVisibilityToDefault(sharedPrefs)
         }
 
         var quest1Id: Int
         var quest2Id: Int
         var quest3Id: Int
 
-        if (currentTime - lastGeneratedTime >= 24 * 60 * 60 * 1000L) {
+        if (currentTime - lastGeneratedTime >= oneDayMillis) {
+
             // More than 24 hours have passed, generate new quests
             val newQuestIds = createRandomQuest()
             quest1Id = newQuestIds[0]
@@ -166,6 +196,7 @@ class questScreen : AppCompatActivity() {
                 putLong("lastGeneratedTime", currentTime)
                 apply()
             }
+
         } else {
             // Load previously stored quests
             quest1Id = sharedPrefs.getInt("quest1Id", 0)
@@ -188,9 +219,23 @@ class questScreen : AppCompatActivity() {
         val quest3 = findViewById<TextView>(R.id.quest3)
 
         //quest buttons
-        val complete1 = findViewById<Button>(R.id.complete1)
-        val complete2 = findViewById<Button>(R.id.complete2)
-        val complete3 = findViewById<Button>(R.id.complete3)
+        complete1 = findViewById<Button>(R.id.complete1)
+        complete2 = findViewById<Button>(R.id.complete2)
+        complete3 = findViewById<Button>(R.id.complete3)
+
+        //quest completed text
+        completeText1 = findViewById<TextView>(R.id.completeText1)
+        completeText2 = findViewById<TextView>(R.id.completeText2)
+        completeText3 = findViewById<TextView>(R.id.completeText3)
+
+        complete1.isVisible = sharedPrefs.getBoolean("complete1Visible", true)
+        completeText1.isVisible = sharedPrefs.getBoolean("completeText1Visible", false)
+
+        complete2.isVisible = sharedPrefs.getBoolean("complete2Visible", true)
+        completeText2.isVisible = sharedPrefs.getBoolean("completeText2Visible", false)
+
+        complete3.isVisible = sharedPrefs.getBoolean("complete3Visible", true)
+        completeText3.isVisible = sharedPrefs.getBoolean("completeText3Visible", false)
 
 
         //changing quests values
@@ -210,6 +255,17 @@ class questScreen : AppCompatActivity() {
 
         //test condition for completing quests
         complete1.setOnClickListener {
+            // Flip visibility
+            complete1.isVisible = false
+            completeText1.isVisible = true
+
+            // Save visibility state
+            with(sharedPrefs.edit()) {
+                putBoolean("complete1Visible", complete1.isVisible)
+                putBoolean("completeText1Visible", completeText1.isVisible)
+                apply()
+            }
+
             val resultIntent = Intent()
             resultIntent.putExtra(questReward[quest1Id], 50)
             setResult(RESULT_OK, resultIntent)
@@ -217,6 +273,16 @@ class questScreen : AppCompatActivity() {
         }
 
         complete2.setOnClickListener {
+            // Flip visibility
+            complete2.isVisible = false
+            completeText2.isVisible = true
+
+            // Save visibility state
+            with(sharedPrefs.edit()) {
+                putBoolean("complete2Visible", complete2.isVisible)
+                putBoolean("completeText2Visible", completeText2.isVisible)
+                apply()
+            }
             val resultIntent = Intent()
             resultIntent.putExtra(questReward[quest2Id], 75)
             setResult(RESULT_OK, resultIntent)
@@ -224,6 +290,16 @@ class questScreen : AppCompatActivity() {
         }
 
         complete3.setOnClickListener {
+            // Flip visibility
+            complete3.isVisible = false
+            completeText3.isVisible = true
+
+            // Save visibility state
+            with(sharedPrefs.edit()) {
+                putBoolean("complete3Visible", complete3.isVisible)
+                putBoolean("completeText3Visible", completeText3.isVisible)
+                apply()
+            }
             val resultIntent = Intent()
             resultIntent.putExtra(questReward[quest3Id], 100)
             setResult(RESULT_OK, resultIntent)

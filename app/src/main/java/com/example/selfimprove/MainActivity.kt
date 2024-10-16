@@ -17,7 +17,18 @@ import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
+    //Different themes and their stats:
+    //Fantasy - JJk - DBZ:
+    //Strength - Cursed Energy
+    //Intelligence - Technique Mastery
+    //dexterity - speed
+    //Charisma - influence
+    //Constitution - Resilience
+    //Wisdom - Combat Skill
 
+    //Selecting which theme the user chooses
+    var sorcererTheme = false
+    var adventureTheme = false
 
     //exp variables
     var strengthXp = 0
@@ -44,6 +55,19 @@ class MainActivity : AppCompatActivity() {
 
     //storing current title
     var curTitle: String = ""
+    var titlePrefix: String = ""
+
+    //checking if the title has been reset already
+    var titleResetOnce = false
+
+    //stat text
+    lateinit var strengthText: TextView
+    lateinit var intText: TextView
+    lateinit var dexText: TextView
+    lateinit var wisText: TextView
+    lateinit var chsText: TextView
+    lateinit var conText: TextView
+
 
     //stats level numbers
     lateinit var strengthNum: TextView
@@ -95,6 +119,10 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("StatData", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
+
+        editor.putBoolean("sorcererTheme", sorcererTheme)
+        editor.putBoolean("adventureTheme", adventureTheme)
+
         editor.putInt("strengthXp", strengthXp)
         editor.putInt("strengthLevel", strengthLevel)
 
@@ -116,12 +144,20 @@ class MainActivity : AppCompatActivity() {
         editor.putInt("overallLevel", overallLevel)
 
         editor.putString("userTitle", curTitle)
+        editor.putString("titlePrefix", titlePrefix)
+
+        editor.putBoolean("titleResetOnce", titleResetOnce)
+
+
 
         editor.apply() // Saves changes asynchronously
     }
 
     fun loadStatData() {
         val sharedPreferences = getSharedPreferences("StatData", MODE_PRIVATE)
+
+        sorcererTheme = sharedPreferences.getBoolean("sorcererTheme", false)
+        adventureTheme = sharedPreferences.getBoolean("adventureTheme", true)
 
         strengthXp = sharedPreferences.getInt("strengthXp", 0)
         strengthLevel = sharedPreferences.getInt("strengthLevel", 0)
@@ -143,12 +179,15 @@ class MainActivity : AppCompatActivity() {
 
         overallLevel = sharedPreferences.getInt("overallLevel", 0)
 
-        curTitle = sharedPreferences.getString("userTitle", "Commoner") ?: "Commoner"
+        titlePrefix = sharedPreferences.getString("titlePrefix", "Title:") ?: "Title"
+        curTitle = sharedPreferences.getString("userTitle", "Civilian") ?: "Civilian"
+
+        titleResetOnce = sharedPreferences.getBoolean("titleResetOnce", false)
+
     }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
-
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -164,7 +203,52 @@ class MainActivity : AppCompatActivity() {
         //rendered title text
         titleText = findViewById<TextView>(R.id.titleHeader)
 
-        titleText.text = "Title: $curTitle"
+        sorcererTheme = intent.getBooleanExtra("sorcererTheme", sorcererTheme)
+        adventureTheme = intent.getBooleanExtra("adventureTheme", adventureTheme)
+
+
+
+        strengthText = findViewById(R.id.strengthText)
+        intText = findViewById(R.id.intText)
+        wisText = findViewById(R.id.wisText)
+        dexText = findViewById(R.id.dexText)
+        chsText = findViewById(R.id.chsText)
+        conText = findViewById(R.id.conText)
+
+        //menu buttons
+        val awakenButton = findViewById<Button>(R.id.placehold1)
+        val themeButton = findViewById<Button>(R.id.placehold2)
+
+        //editing the screen based on the theme chosen
+        if(sorcererTheme){
+            strengthText.text = "Cursed Energy:"
+            intText.text = "Technique Mastery:"
+            dexText.text = "Speed:"
+            wisText.text = "Combat Skill:"
+            chsText.text = "Influence:"
+            conText.text = "Reselience:"
+            awakenButton.text = "Manifest"
+            titlePrefix = "Domain Expansion:"
+            titleText.text = "$titlePrefix $curTitle"
+            saveStatData()
+        } else if(adventureTheme) {
+            strengthText.text = "Strength:"
+            intText.text = "Intelligence:"
+            dexText.text = "Dexterity:"
+            wisText.text = "Wisdom:"
+            chsText.text = "Charisma:"
+            conText.text = "Constitution:"
+            awakenButton.text = "Awaken"
+            titlePrefix = "Title:"
+            titleText.text = "$titlePrefix $curTitle"
+            saveStatData()
+
+        }
+
+
+
+
+
 
         questLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -205,7 +289,7 @@ class MainActivity : AppCompatActivity() {
                             increaseSmart(smartProgress)
                         }
                         if (chsXpEarned > 0) {
-                            increaseWis(chsProgress)
+                            increaseChs(chsProgress)
                         }
                     }
                 }
@@ -251,12 +335,11 @@ class MainActivity : AppCompatActivity() {
         conProgress.progress = conXp
 
 
+
+
         //Main Buttons
         val questButton = findViewById<Button>(R.id.questButton)
 
-        //placeholder buttons
-        val awakenButton = findViewById<Button>(R.id.placehold1)
-        val placeholderButton2 = findViewById<Button>(R.id.placehold2)
 
         //logic to send the user to the quests screen
         questButton.setOnClickListener {
@@ -264,7 +347,7 @@ class MainActivity : AppCompatActivity() {
             questLauncher.launch(intent)
         }
 
-        //testing button for levelling up
+        //button to unlock new titles
         awakenButton.setOnClickListener {
             if (overallLevel >= 10) {
                 curTitle = createUserTitle()
@@ -273,12 +356,18 @@ class MainActivity : AppCompatActivity() {
                 builder.setMessage("Congratulations! You have earned the title: $curTitle!")
                 builder.setPositiveButton("OK", null)
                 builder.show()
-                titleText.text = "Title: ${curTitle}"
+                titleText.text = "$titlePrefix $curTitle"
             } else {
                 Toast.makeText(this, "You need to be level 10 to earn a title", Toast.LENGTH_LONG)
                     .show()
             }
             saveStatData()
+        }
+
+        //button to change theme
+        themeButton.setOnClickListener {
+            val intent = Intent(this, themeScreen::class.java)
+            startActivity(intent)
         }
     }
 
